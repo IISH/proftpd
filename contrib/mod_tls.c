@@ -3632,8 +3632,8 @@ static int tls_accept(conn_t *conn, unsigned char on_data) {
   }
 
   if (on_data) {
-    /* Make sure that TCP_NODELAY is enabled for the handshake. */
-    pr_inet_set_proto_nodelay(conn->pool, conn, 1);
+    /* Make sure that TCP_NODELAY is DISABLED for the handshake. */
+    pr_inet_set_proto_nodelay(conn->pool, conn, 0);
   }
 
   retry:
@@ -3736,8 +3736,8 @@ static int tls_accept(conn_t *conn, unsigned char on_data) {
   }
 
   if (on_data) {
-    /* Disable TCP_NODELAY, now that the handshake is done. */
-    pr_inet_set_proto_nodelay(conn->pool, conn, 0);
+    /* Re-enable TCP_NODELAY, now that the handshake is done. */
+    pr_inet_set_proto_nodelay(conn->pool, conn, 1);
   }
  
   /* Disable the handshake timer. */
@@ -4826,9 +4826,9 @@ static int tls_readmore(int rfd) {
   FD_ZERO(&rfds);
   FD_SET(rfd, &rfds);
 
-  /* Use a timeout of 500 millisecs */
-  tv.tv_sec = 0;
-  tv.tv_usec = (500 * 1000);
+  /* Use a timeout of 5 secs */
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
 
   return select(rfd + 1, &rfds, NULL, NULL, &tv);
 }
@@ -4840,9 +4840,9 @@ static int tls_writemore(int wfd) {
   FD_ZERO(&wfds);
   FD_SET(wfd, &wfds);
 
-  /* Use a timeout of 500 millisecs */
-  tv.tv_sec = 0;
-  tv.tv_usec = (500 * 1000);
+  /* Use a timeout of 5 secs */
+  tv.tv_sec = 5;
+  tv.tv_usec = 0;
 
   return select(wfd + 1, NULL, &wfds, NULL, &tv);
 }
